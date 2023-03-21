@@ -1,0 +1,215 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>默认样式信息窗体</title>
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <style>
+        html,
+        body,
+        #container {
+            height: 100%;
+            width: 100%;
+        }
+
+        .content-window-card {
+            position: relative;
+            box-shadow: none;
+            bottom: 0;
+            left: 0;
+            width: auto;
+            padding: 0;
+        }
+
+        .content-window-card p {
+            height: 2rem;
+        }
+
+        .custom-info {
+            border: solid 1px silver;
+        }
+
+        div.info-top {
+            position: relative;
+            background: none repeat scroll 0 0 #F9F9F9;
+            border-bottom: 1px solid #CCC;
+            border-radius: 5px 5px 0 0;
+        }
+
+        div.info-top div {
+            display: inline-block;
+            color: #333333;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 31px;
+            padding: 0 10px;
+        }
+
+        div.info-top img {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            transition-duration: 0.25s;
+        }
+
+        div.info-top img:hover {
+            box-shadow: 0px 0px 5px #000;
+        }
+
+        div.info-middle {
+            font-size: 12px;
+            padding: 10px 6px;
+            line-height: 20px;
+        }
+
+        div.info-bottom {
+            height: 0px;
+            width: 100%;
+            clear: both;
+            text-align: center;
+        }
+
+        div.info-bottom img {
+            position: relative;
+            z-index: 104;
+        }
+
+        span {
+            margin-left: 5px;
+            font-size: 11px;
+        }
+
+        .info-middle img {
+            float: left;
+            margin-right: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <div class="info">
+        点击地图上的点标记，打开所添加的自定义信息窗体
+    </div>
+    <script type="text/javascript"
+        src="https://webapi.amap.com/maps?v=2.0&key=9e11e2714ea77d6a8aefa60cc74dc3cd"></script>
+    <script type="text/javascript" src="https://cache.amap.com/lbs/static/addToolbar.js"></script>
+    <script type="text/javascript">    //地图初始化时，在地图上添加一个marker标记,鼠标点击marker可弹出自定义的信息窗体
+        var map = new AMap.Map("container", {
+            resizeEnable: true,
+            center: [121.55611, 31.36871],
+            zoom: 15
+        });
+        //实例化信息窗体
+        var title = '方恒假日酒店<span style="font-size:11px;color:#F00;">价格:318</span>',
+            content = [];
+        content.push("<img src='http://tpc.googlesyndication.com/simgad/5843493769827749134'>地址：北京市朝阳区阜通东大街6号院3号楼东北8.3公里");
+        content.push("电话：010-64733333");
+        content.push("<a href='https://ditu.amap.com/detail/B000A8URXB?citycode=110105'>详细信息</a>");
+        var infoWindow = new AMap.InfoWindow({
+            isCustom: true,  //使用自定义窗体
+            content: createInfoWindow(title, content.join("<br/>")),
+            offset: new AMap.Pixel(16, -45)
+        });
+        //就这里的title content是下面有一个createInfoWindow函数的参数，就是用来设置信息窗体里面的东西
+        //这个我还不太知道是怎么回事 qaq
+        //(title, content.join("<br/>")
+        // 自己写的代码
+        addMarker();
+        map.setFitView();
+        closeInfoWindow();
+
+        //添加marker标记
+         //这里就是之前的信息
+        function addMarker() {
+            var lnglats = [
+                [121.55611, 31.36871],
+                [121.560633, 31.375343],
+                [121.55625, 31.37645],
+                [121.561027, 31.36745],
+                [121.7188, 31.24736]
+            ];
+            var address = [
+                ["凌海路109号"],
+                ["凌海路909号"],
+                ["随塘路88号"],
+                ["随塘路869号"],
+                ["奚阳路130号（东区）"]
+            ];
+           
+            for (var i = 0, marker; i < lnglats.length; i++) {
+                var marker = new AMap.Marker({
+                    position: lnglats[i],
+                    map: map
+                });
+                marker.content = '地址：' + address[i];
+                marker.on('click', markerClick);//这里是设置每个marker被点击的时候的事件，事件的函数是markerClick
+                marker.emit('click', { target: marker });//对，我就不知道后面
+            }//你看下面这个markerClick
+        }
+
+        function markerClick(e) {
+            var title = '我的停车场<span style="font-size:11px;color:#F00;">价格:318</span>',
+                content = [];
+            //对对 就是这个e 就跟之前C#的点击事件里面的e是差不多的东西，e.target返回的就是点击到的marker，然后调用maker的属性就可以了
+            //然后你可以看一眼上面 实例化窗体的地方
+            content.push("<img src='http://tpc.googlesyndication.com/simgad/5843493769827749134'>地址："+e.target.content);
+            //content.push("电话：010-64733333");
+            content.push("<a href=\"tel:010-64733333\">tel:010-64733333</a>");
+            content.push("<a href='https://www.amap.com/dir?from%5Bid%5D=B00155IVKB-from&from%5Bname%5D=%E5%8D%8E%E4%B8%9C%E5%B8%88%E8%8C%83%E5%A4%A7%E5%AD%A6%E9%97%B5%E8%A1%8C%E6%A0%A1%E5%8C%BA&from%5Blnglat%5D=121.453720%2C31.031449&from%5Bmodxy%5D=121.452894%2C31.037048&from%5Bpoitype%5D=141201&from%5Badcode%5D=310112&to%5Bname%5D=%E4%B8%8A%E6%B5%B7%E5%B8%82%E6%B5%A6%E4%B8%9C%E6%96%B0%E5%8C%BA%E5%87%8C%E6%B5%B7%E8%B7%AF909%E5%8F%B7&to%5Blnglat%5D=121.560782%2C31.373453&to%5Bid%5D=4cc2d2cba4bab159cf8fd1d4e282eff9-to&to%5Bpoitype%5D=&to%5Badcode%5D=310000&to%5Bmodxy%5D=121.560782%2C31.373453&type=car&policy=1&dateTime=now'>详细信息</a>");
+            var refreshContent = createInfoWindow(e.target.content,content)
+            infoWindow.setContent(refreshContent);
+            infoWindow.open(map, e.target.getPosition());
+        }//这里上面那个加e.target.content是精髓！！
+
+        //构建自定义信息窗体
+        function createInfoWindow(title, content) {
+            var info = document.createElement("div");
+            info.className = "custom-info input-card content-window-card";
+
+            //可以通过下面的方式修改自定义窗体的宽高
+            info.style.width = "400px";
+            // 定义顶部标题
+            var top = document.createElement("div");
+            var titleD = document.createElement("div");
+            var closeX = document.createElement("img");
+            top.className = "info-top";
+            titleD.innerHTML = title;
+            closeX.src = "https://webapi.amap.com/images/close2.gif";
+            closeX.onclick = closeInfoWindow;
+
+            top.appendChild(titleD);
+            top.appendChild(closeX);
+            info.appendChild(top);
+
+            // 定义中部内容
+            var middle = document.createElement("div");
+            middle.className = "info-middle";
+            middle.style.backgroundColor = 'white';
+            middle.innerHTML = content;
+            info.appendChild(middle);
+
+            // 定义底部内容
+            var bottom = document.createElement("div");
+            bottom.className = "info-bottom";
+            bottom.style.position = 'relative';
+            bottom.style.top = '0px';
+            bottom.style.margin = '0 auto';
+            var sharp = document.createElement("img");
+            sharp.src = "https://webapi.amap.com/images/sharp.png";
+            bottom.appendChild(sharp);
+            info.appendChild(bottom);
+            return info;
+        }
+
+        //关闭信息窗体
+        function closeInfoWindow() {
+            map.clearInfoWindow();
+        }
+    </script>
+</body>
+
+</html>
